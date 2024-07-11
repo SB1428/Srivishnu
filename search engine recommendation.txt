@@ -1,0 +1,49 @@
+# Search Engine Recommendation
+
+!pip install fast-autocomplete[levenshtein]
+import ipywidgets as widgets
+from IPython.display import Javascript, display
+
+from fast_autocomplete import AutoComplete # import after installing the dependency
+
+words = {'book': {}, 'burrito': {}, 'pizza': {}, 'pasta':{}}
+autocomplete = AutoComplete(words=words)
+
+def on_change(data):
+    global text  # inform function to use global `text` instead of local `text` when you assign `text = ...`
+
+    #print(data)
+
+    text = data['new']
+    #print(text)
+
+    values = autocomplete.search(text, max_cost=3, size=3)
+    #print(values)
+
+    # convert nested list to flat list
+    values = list(sorted(set(str(item) for sublist in values for item in sublist)))
+    #print(values)
+
+    # remove previous options from tag `<datalist>` in HTML
+    display(Javascript(""" document.querySelector("datalist").innerHTML = "" """))
+
+    combo.options = values
+
+combo = widgets.Combobox(
+    value='',
+    placeholder='Type something',
+    description='String:',
+    disabled=False
+)
+combo.observe(on_change, names='value')
+
+def your_function(widget):
+    print('widget:', widget)
+    print('global text:', text)
+    # here make all calculations
+
+button = widgets.Button(description='OK')
+button.on_click(your_function)
+
+display(combo, button)
+

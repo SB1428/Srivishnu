@@ -1,11 +1,18 @@
 from fastapi import FastAPI, HTTPException, Form
 from fastapi.responses import HTMLResponse
+from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 import asyncio
 
 # Load the dataset into a Pandas DataFrame
 df = pd.read_csv('C:/Dataset/chatbot_data.csv')  # Adjust path as per your actual file location
+
+# Split data into training and testing sets
+X = df['instruction'].values
+y = df['response'].values
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Initialize FastAPI
 app = FastAPI()
@@ -151,6 +158,7 @@ def train_model():
 
     return "Training completed up to epoch 2.5"
 
+
 @app.get("/", response_class=HTMLResponse)
 async def main():
     return html_form
@@ -193,7 +201,24 @@ async def start_training():
     # Simulated training process
     result = train_model()
     return result
+import matplotlib.pyplot as plt
 
+# Dummy data (replace with actual data)
+epochs = 1000
+train_losses = [0.5 - i * 0.005 for i in range(epochs)]  # Example decreasing trend for training loss
+test_losses = [0.6 - i * 0.004 for i in range(epochs)]  # Example decreasing trend for testing loss
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(range(epochs), train_losses, label='Training Loss', color='blue', linestyle='-')
+plt.plot(range(epochs), test_losses, label='Testing Loss', color='red', linestyle='--')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.title('Training and Testing Loss over Epochs')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+#plt.show()
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="localhost", port=8020)
